@@ -1,8 +1,20 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { auth } from '@/auth';
-import { getUserRole } from '@/lib/auth-helpers';
+import { getUserRole, type RoleData } from '@/lib/auth-helpers';
 import { CampaignList } from './components/campaign-list';
+import { getSponsorCampaigns } from './actions';
+
+const REQUEST_TIMEOUT_MS = 5000;
+
+function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) => {
+      setTimeout(() => reject(new Error('Request timed out')), timeoutMs);
+    }),
+  ]);
+}
 
 export default async function SponsorDashboard() {
   const session = await auth.api.getSession({
@@ -13,11 +25,18 @@ export default async function SponsorDashboard() {
     redirect('/login');
   }
 
-  // Verify user has 'sponsor' role
-  const roleData = await getUserRole(session.user.id);
-  if (roleData.role !== 'sponsor') {
+  let roleData: RoleData;
+  try {
+    roleData = await withTimeout(getUserRole(session.user.id), REQUEST_TIMEOUT_MS);
+  } catch {
+    return <CampaignList campaigns={[]} error="Failed to load campaigns" />;
+  }
+
+  if (roleData.role !== 'sponsor' || !roleData.sponsorId) {
     redirect('/');
   }
+
+  const { campaigns, error } = await getSponsorCampaigns(roleData.sponsorId);
 
   return (
     <div className="space-y-6">
@@ -26,7 +45,7 @@ export default async function SponsorDashboard() {
         {/* TODO: Add CreateCampaignButton here */}
       </div>
 
-      <CampaignList />
+      <CampaignList campaigns={campaigns} error={error} />
     </div>
   );
 }

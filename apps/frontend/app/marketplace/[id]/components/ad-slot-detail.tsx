@@ -254,7 +254,7 @@ export function AdSlotDetail({ id }: Props) {
                 <button
                   onClick={handleBooking}
                   disabled={booking}
-                  className="w-full rounded-lg bg-[--color-primary] px-4 py-3 font-semibold text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                  className="w-full rounded-lg bg-indigo-600 px-4 py-3 font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-500 disabled:text-white"
                 >
                   {booking ? 'Booking...' : 'Book This Placement'}
                 </button>
