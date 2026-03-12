@@ -11,6 +11,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4291';
 export async function api<T>(endpoint: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}${endpoint}`, {
     headers: { 'Content-Type': 'application/json', ...options?.headers },
+    credentials: options?.credentials ?? 'include',// send better-auth-session cookie    
     ...options,
   });
   if (!res.ok) throw new Error('API request failed');
@@ -31,6 +32,12 @@ export const getAdSlots = (publisherId?: string) =>
 export const getAdSlot = (id: string) => api<any>(`/api/ad-slots/${id}`);
 export const createAdSlot = (data: any) =>
   api('/api/ad-slots', { method: 'POST', body: JSON.stringify(data) });
+//marketplace
+export const getMarketplaceAdSlots = () =>
+  api<any[]>('/api/ad-slots/public?available=true', { credentials: 'omit' });
+export const getMarketplaceAdSlot = (id: string) =>
+  api<any>(`/api/ad-slots/public/${id}`, { credentials: 'omit' });
+
 // TODO: Add updateAdSlot, deleteAdSlot functions
 
 // Placements

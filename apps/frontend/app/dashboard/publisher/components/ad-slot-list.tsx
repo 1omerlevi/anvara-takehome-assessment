@@ -23,7 +23,7 @@ export function AdSlotList() {
         const roleData = await roleRes.json();
 
         if (roleData.publisherId) {
-          const data = await getAdSlots(roleData.publisherId);
+          const data = await getAdSlots();
           setAdSlots(data);
         } else {
           setAdSlots([]);

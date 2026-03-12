@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { getAdSlot } from '@/lib/api';
+//import { getAdSlot } from '@/lib/api';
 import { authClient } from '@/auth-client';
+import { getMarketplaceAdSlot } from '@/lib/api';
+
 
 interface AdSlot {
   id: string;
@@ -57,10 +59,10 @@ export function AdSlotDetail({ id }: Props) {
 
   useEffect(() => {
     // Fetch ad slot
-    getAdSlot(id)
-      .then(setAdSlot)
-      .catch(() => setError('Failed to load ad slot details'))
-      .finally(() => setLoading(false));
+    getMarketplaceAdSlot(id)
+    .then(setAdSlot)
+    .catch(() => setError('Failed to load ad slot details'))
+    .finally(() => setLoading(false));
 
     // Check user session and fetch role
     authClient
