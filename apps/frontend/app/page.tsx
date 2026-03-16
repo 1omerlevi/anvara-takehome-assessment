@@ -113,7 +113,10 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <article aria-labelledby="hero-heading">
+    <article
+      aria-labelledby="hero-heading"
+      className="relative left-1/2 right-1/2 min-h-screen w-screen -translate-x-1/2 px-4 pb-8 sm:px-6 lg:px-8"
+    >
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
         <video className="h-full w-full object-cover" autoPlay muted loop playsInline>
           <source src="/hero-background.mp4" type="video/mp4" />
@@ -123,7 +126,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-[rgba(2,6,23,0.3)]" />
       </div>
 
-      <div className="relative z-10 space-y-8 sm:space-y-10">
+      <div className="relative z-10 mx-auto max-w-7xl space-y-8 sm:space-y-10">
         <header className="relative overflow-hidden rounded-[2.5rem] border border-white/12 bg-[rgba(8,17,32,0.46)] px-6 pb-10 pt-12 shadow-[0_30px_100px_rgba(2,6,23,0.45)] backdrop-blur-[6px] sm:px-10 sm:pb-14 sm:pt-16 lg:px-14 lg:pt-20">
           <div className="relative z-10 mx-auto flex max-w-5xl flex-col items-center text-center">
             <p className="rounded-full border border-white/18 bg-black/20 px-4 py-2 text-xs uppercase tracking-[0.3em] text-slate-200">

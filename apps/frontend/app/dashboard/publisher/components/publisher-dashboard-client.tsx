@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
-import { useFormState, useFormStatus } from 'react-dom';
+import { useActionState, useEffect, useEffectEvent, useMemo, useState } from 'react';
+import { useFormStatus } from 'react-dom';
 import {
   createAdSlot,
   deleteAdSlot,
@@ -38,17 +38,20 @@ function formatCurrency(value: number) {
 }
 
 function formatCompactCurrency(value: number) {
-  // Fixes: small values use the regular formatter so SSR and client hydration render the same text.
+  // Fixes: uses manual compact formatting so SSR and client hydration render identical currency text.
   if (Math.abs(value) < 1000) {
     return formatCurrency(value);
   }
 
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  }).format(value);
+  if (Math.abs(value) < 1_000_000) {
+    const compactValue = value / 1000;
+    const decimals = Number.isInteger(compactValue) ? 0 : 1;
+    return `$${compactValue.toFixed(decimals)}K`;
+  }
+
+  const compactValue = value / 1_000_000;
+  const decimals = Number.isInteger(compactValue) ? 0 : 1;
+  return `$${compactValue.toFixed(decimals)}M`;
 }
 
 function getTypeBadgeClass(type: string) {
@@ -106,7 +109,18 @@ function ToastBanner({ toast, onDismiss }: { toast: Toast; onDismiss: () => void
           : 'border-rose-400/30 bg-rose-500/10 text-rose-100'
       }`}
     >
-      <p>{toast.message}</p>
+      <div className="flex items-start gap-3">
+        {toast.tone === 'success' ? (
+          <span className="dashboard-success-mark mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-400/20 text-xs font-bold text-emerald-100">
+            ✓
+          </span>
+        ) : (
+          <span className="mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-rose-400/20 text-xs font-bold text-rose-100">
+            !
+          </span>
+        )}
+        <p>{toast.message}</p>
+      </div>
       <button type="button" onClick={onDismiss} className="text-xs font-semibold uppercase tracking-[0.2em]">
         Dismiss
       </button>
@@ -128,15 +142,17 @@ function AdSlotForm({
   onError: (message: string) => void;
 }) {
   const action = mode === 'create' ? createAdSlot : updateAdSlot;
-  const [state, formAction] = useFormState(action, initialState);
+  const [state, formAction] = useActionState(action, initialState);
+  const emitSuccess = useEffectEvent(onSuccess);
+  const emitError = useEffectEvent(onError);
 
   useEffect(() => {
     if (state.success && state.message) {
-      onSuccess(state.message);
+      emitSuccess(state.message);
     } else if (state.error) {
-      onError(state.error);
+      emitError(state.error);
     }
-  }, [state, onError, onSuccess]);
+  }, [state.error, state.message, state.success]);
 
   return (
     <form action={formAction} className="dashboard-card dashboard-fade-up p-6 sm:p-8">
@@ -330,20 +346,23 @@ function DeleteAdSlotModal({
   onSuccess: (message: string) => void;
   onError: (message: string) => void;
 }) {
-  const [state, formAction] = useFormState(deleteAdSlot, initialState);
+  const [state, formAction] = useActionState(deleteAdSlot, initialState);
+  const emitSuccess = useEffectEvent(onSuccess);
+  const emitError = useEffectEvent(onError);
+  const closeModal = useEffectEvent(onClose);
 
   useEffect(() => {
     if (state.success && state.message) {
-      onSuccess(state.message);
-      onClose();
+      emitSuccess(state.message);
+      closeModal();
     } else if (state.error) {
-      onError(state.error);
+      emitError(state.error);
     }
-  }, [state, onClose, onError, onSuccess]);
+  }, [state.error, state.message, state.success]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(2,6,23,0.78)] p-4 backdrop-blur-sm">
-      <div className="dashboard-card w-full max-w-md p-6">
+    <div className="dashboard-modal-backdrop fixed inset-0 z-50 flex items-center justify-center bg-[rgba(2,6,23,0.78)] p-4 backdrop-blur-sm">
+      <div className="dashboard-card dashboard-modal-panel w-full max-w-md p-6">
         <p className="text-xs font-semibold uppercase tracking-[0.28em] text-rose-300">Confirm delete</p>
         <h3 className="mt-3 text-xl font-semibold text-white">Delete “{adSlot.name}”?</h3>
         <p className="mt-3 text-sm leading-6 text-slate-300">
@@ -607,7 +626,9 @@ export function PublisherDashboardClient({
             {filteredAdSlots.map((slot, index) => (
               <article
                 key={slot.id}
-                className="dashboard-card dashboard-card-hover dashboard-fade-up p-5 sm:p-6"
+                className={`dashboard-card dashboard-card-hover dashboard-fade-up p-5 sm:p-6 ${
+                  pendingDeleteId === slot.id ? 'dashboard-card-pending-delete' : ''
+                }`}
                 style={{ animationDelay: `${index * 40}ms` }}
               >
                 <div className="relative z-10">

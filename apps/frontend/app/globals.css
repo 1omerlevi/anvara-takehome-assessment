@@ -196,6 +196,10 @@ textarea {
   font-weight: 600;
 }
 
+.dashboard-button:active {
+  transform: scale(0.98);
+}
+
 .dashboard-button-primary {
   background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
   color: white;
@@ -219,6 +223,28 @@ textarea {
 
 .dashboard-fade-up {
   animation: fade-up 280ms ease-out both;
+}
+
+.dashboard-page-transition {
+  animation: page-enter 320ms ease-out both;
+}
+
+.dashboard-modal-backdrop {
+  animation: modal-backdrop-in 180ms ease-out both;
+}
+
+.dashboard-modal-panel {
+  animation: modal-panel-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dashboard-card-pending-delete {
+  opacity: 0.45;
+  transform: scale(0.985);
+  filter: saturate(0.7);
+}
+
+.dashboard-success-mark {
+  animation: success-pop 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 a {
@@ -304,13 +330,68 @@ textarea {
   }
 }
 
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes success-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .logo-track {
     animation: none;
   }
 
   .dashboard-toast,
-  .dashboard-fade-up {
+  .dashboard-fade-up,
+  .dashboard-page-transition,
+  .dashboard-modal-backdrop,
+  .dashboard-modal-panel,
+  .dashboard-success-mark {
     animation: none;
   }
 }
