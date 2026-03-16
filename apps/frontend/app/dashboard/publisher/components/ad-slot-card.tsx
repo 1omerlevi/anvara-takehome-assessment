@@ -4,7 +4,7 @@ interface AdSlotCardProps {
   adSlot: {
     id: string;
     name: string;
-    description?: string;
+    description?: string | null;
     type: string;
     basePrice: number;
     isAvailable: boolean;

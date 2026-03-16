@@ -4,11 +4,12 @@ import { useEffect, useState } from 'react';
 import { getAdSlots } from '@/lib/api';
 import { authClient } from '@/auth-client';
 import { AdSlotCard } from './ad-slot-card';
+import type { PublisherAdSlot } from '../actions';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4291';
+const API_URL = globalThis.process?.env.NEXT_PUBLIC_API_URL || 'http://localhost:4291';
 
 export function AdSlotList() {
-  const [adSlots, setAdSlots] = useState<any[]>([]);
+  const [adSlots, setAdSlots] = useState<PublisherAdSlot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { data: session } = authClient.useSession();
