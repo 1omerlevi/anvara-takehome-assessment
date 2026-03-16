@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { getMarketplaceAdSlots } from '@/lib/api';
+import { trackMarketplaceEvent } from '@/lib/analytics';
 
 interface MarketplaceAdSlot {
   id: string;
@@ -55,6 +56,7 @@ export function AdSlotGrid() {
   const [typeFilter, setTypeFilter] = useState<'ALL' | MarketplaceAdSlot['type']>('ALL');
   const [sortBy, setSortBy] = useState<'featured' | 'price-low' | 'price-high'>('featured');
   const [view, setView] = useState<'grid' | 'list'>('grid');
+  const lastFilterSignature = useRef<string | null>(null);
 
   useEffect(() => {
     getMarketplaceAdSlots()
@@ -99,6 +101,39 @@ export function AdSlotGrid() {
 
     return { publishers, avgPrice, premiumCount };
   }, [adSlots]);
+
+  useEffect(() => {
+    if (loading || error) return;
+
+    trackMarketplaceEvent('marketplace_viewed', {
+      listing_count: adSlots.length,
+      publisher_count: stats.publishers,
+      premium_count: stats.premiumCount,
+    });
+  }, [adSlots.length, error, loading, stats.premiumCount, stats.publishers]);
+
+  useEffect(() => {
+    if (loading || error) return;
+
+    const signature = JSON.stringify({
+      search,
+      typeFilter,
+      sortBy,
+      view,
+      resultCount: filteredSlots.length,
+    });
+
+    if (lastFilterSignature.current === signature) return;
+    lastFilterSignature.current = signature;
+
+    trackMarketplaceEvent('marketplace_filters_changed', {
+      search_length: search.trim().length,
+      type_filter: typeFilter,
+      sort_by: sortBy,
+      view,
+      result_count: filteredSlots.length,
+    });
+  }, [error, filteredSlots.length, loading, search, sortBy, typeFilter, view]);
 
   if (loading) {
     return (
@@ -237,6 +272,15 @@ export function AdSlotGrid() {
               <Link
                 key={slot.id}
                 href={`/marketplace/${slot.id}`}
+                onClick={() =>
+                  trackMarketplaceEvent('marketplace_listing_clicked', {
+                    listing_id: slot.id,
+                    listing_type: slot.type,
+                    publisher_name: slot.publisher?.name || 'Independent publisher',
+                    price: Number(slot.basePrice),
+                    rank: index + 1,
+                  })
+                }
                 className="dashboard-card dashboard-card-hover dashboard-fade-up block p-5 sm:p-6"
                 style={{ animationDelay: `${index * 35}ms` }}
               >

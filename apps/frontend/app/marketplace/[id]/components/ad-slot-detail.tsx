@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { authClient } from '@/auth-client';
 import { getMarketplaceAdSlot } from '@/lib/api';
+import { trackMarketplaceEvent } from '@/lib/analytics';
 
 interface AdSlot {
   id: string;
@@ -69,6 +70,7 @@ export function AdSlotDetail({ id }: Props) {
   const [booking, setBooking] = useState(false);
   const [bookingSuccess, setBookingSuccess] = useState(false);
   const [bookingError, setBookingError] = useState<string | null>(null);
+  const trackedView = useRef(false);
 
   useEffect(() => {
     getMarketplaceAdSlot(id)
@@ -96,11 +98,30 @@ export function AdSlotDetail({ id }: Props) {
       .catch(() => setRoleLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (!adSlot || trackedView.current) return;
+
+    trackedView.current = true;
+    trackMarketplaceEvent('marketplace_detail_viewed', {
+      listing_id: adSlot.id,
+      listing_type: adSlot.type,
+      is_available: adSlot.isAvailable,
+      price: Number(adSlot.basePrice),
+      publisher_name: adSlot.publisher?.name || 'Independent publisher',
+    });
+  }, [adSlot]);
+
   const handleBooking = async () => {
     if (!roleInfo?.sponsorId || !adSlot) return;
 
     setBooking(true);
     setBookingError(null);
+    trackMarketplaceEvent('marketplace_request_attempted', {
+      listing_id: adSlot.id,
+      sponsor_id: roleInfo.sponsorId,
+      has_message: Boolean(message.trim()),
+      message_length: message.trim().length,
+    });
 
     try {
       const response = await fetch(`${API_URL}/api/ad-slots/${adSlot.id}/book`, {
@@ -119,8 +140,18 @@ export function AdSlotDetail({ id }: Props) {
 
       setBookingSuccess(true);
       setAdSlot({ ...adSlot, isAvailable: false });
+      trackMarketplaceEvent('marketplace_request_succeeded', {
+        listing_id: adSlot.id,
+        sponsor_id: roleInfo.sponsorId,
+      });
     } catch (err) {
-      setBookingError(err instanceof Error ? err.message : 'Failed to book placement');
+      const messageText = err instanceof Error ? err.message : 'Failed to book placement';
+      setBookingError(messageText);
+      trackMarketplaceEvent('marketplace_request_failed', {
+        listing_id: adSlot.id,
+        sponsor_id: roleInfo.sponsorId,
+        error: messageText,
+      });
     } finally {
       setBooking(false);
     }
@@ -281,6 +312,12 @@ export function AdSlotDetail({ id }: Props) {
                   Include campaign timing, target audience, and any creative constraints in your request message so the publisher can qualify the placement faster.
                 </p>
               </div>
+              <div className="dashboard-mini-card p-4 md:col-span-2">
+                <p className="text-sm text-slate-400">What happens next</p>
+                <p className="mt-2 text-sm leading-7 text-slate-300">
+                  Sponsors submit a direct request with campaign context, and the listing is immediately marked unavailable to reinforce scarcity and prevent duplicate demand.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -345,7 +382,15 @@ export function AdSlotDetail({ id }: Props) {
                 </button>
               </div>
             ) : (
-              <div className="mt-6 rounded-2xl border border-white/10 bg-white/4 p-4">
+              <div
+                className="mt-6 rounded-2xl border border-white/10 bg-white/4 p-4"
+                onClick={() =>
+                  trackMarketplaceEvent('marketplace_request_blocked', {
+                    listing_id: adSlot.id,
+                    reason: user ? 'non_sponsor_user' : 'anonymous_user',
+                  })
+                }
+              >
                 <button
                   disabled
                   className="dashboard-button w-full cursor-not-allowed rounded-full bg-white/10 text-sm text-slate-400"
