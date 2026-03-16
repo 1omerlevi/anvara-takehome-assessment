@@ -9,19 +9,23 @@
 /* Custom theme variables - modify these to customize the marketplace look */
 :root {
   /* Primary brand colors */
-  --color-primary: #6366f1;
-  --color-primary-hover: #4f46e5;
-  --color-primary-light: #818cf8;
+  --color-primary: #2550d8;
+  --color-primary-hover: #1d42b8;
+  --color-primary-light: #6f9cff;
+  --color-accent: #14b8a6;
+  --color-accent-soft: rgba(20, 184, 166, 0.18);
 
   /* Secondary colors */
   --color-secondary: #10b981;
   --color-secondary-hover: #059669;
 
   /* Neutral colors */
-  --color-background: #ffffff;
-  --color-foreground: #0f172a;
-  --color-muted: #64748b;
-  --color-border: #e2e8f0;
+  --color-background: #07111f;
+  --color-surface: rgba(9, 18, 34, 0.78);
+  --color-surface-strong: rgba(7, 13, 27, 0.92);
+  --color-foreground: #f8fafc;
+  --color-muted: #9db0c9;
+  --color-border: rgba(148, 163, 184, 0.18);
 
   /* Status colors */
   --color-success: #22c55e;
@@ -35,24 +39,280 @@
 /* Dark mode support - TODO: Implement dark mode toggle */
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-background: #0f172a;
+    --color-background: #081120;
     --color-foreground: #f8fafc;
     --color-muted: #94a3b8;
-    --color-border: #334155;
+    --color-border: rgba(148, 163, 184, 0.2);
   }
 }
 
 /* Base styles */
 body {
-  background-color: var(--color-background);
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, color-mix(in srgb, var(--color-primary) 26%, transparent), transparent 28%),
+    radial-gradient(circle at 85% 10%, color-mix(in srgb, var(--color-accent) 18%, transparent), transparent 24%),
+    linear-gradient(180deg, #0c172b 0%, var(--color-background) 48%, #040913 100%);
   color: var(--color-foreground);
   font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
+    'Avenir Next',
     'Segoe UI',
-    Roboto,
     sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(111, 156, 255, 0.32);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: color-mix(in srgb, var(--color-muted) 70%, transparent);
+}
+
+button,
+input,
+select,
+textarea {
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    opacity 160ms ease;
+}
+
+.dashboard-shell {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 2rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 22%),
+    linear-gradient(180deg, rgba(7, 13, 27, 0.88), rgba(6, 11, 22, 0.82));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 28px 80px rgba(2, 6, 23, 0.28);
+}
+
+.dashboard-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at top right, rgba(111, 156, 255, 0.14), transparent 28%),
+    radial-gradient(circle at left center, rgba(20, 184, 166, 0.1), transparent 24%);
+}
+
+.dashboard-grid {
+  position: relative;
+  z-index: 1;
+}
+
+.dashboard-stat {
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 1.5rem;
+  background:
+    radial-gradient(circle at top right, rgba(111, 156, 255, 0.16), transparent 34%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 20px 44px rgba(2, 6, 23, 0.2);
+  backdrop-filter: blur(12px);
+}
+
+.dashboard-card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  border-radius: 1.5rem;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 28%),
+    rgba(7, 13, 27, 0.72);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 20px 48px rgba(2, 6, 23, 0.18);
+  backdrop-filter: blur(12px);
+}
+
+.dashboard-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(111, 156, 255, 0.08), transparent 36%);
+}
+
+.dashboard-card-hover {
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.dashboard-card-hover:hover {
+  transform: translateY(-3px);
+  border-color: rgba(111, 156, 255, 0.28);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 28px 60px rgba(2, 6, 23, 0.24);
+}
+
+.dashboard-mini-card {
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 1.1rem;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.dashboard-input {
+  width: 100%;
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  border-radius: 1rem;
+  background: rgba(8, 17, 32, 0.72);
+  color: var(--color-foreground);
+  padding: 0.85rem 1rem;
+  outline: none;
+}
+
+.dashboard-input:focus {
+  border-color: rgba(111, 156, 255, 0.75);
+  box-shadow: 0 0 0 4px rgba(37, 80, 216, 0.2);
+}
+
+.dashboard-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 999px;
+  padding: 0.8rem 1.1rem;
+  font-weight: 600;
+}
+
+.dashboard-button-primary {
+  background: linear-gradient(180deg, var(--color-primary-light), var(--color-primary));
+  color: white;
+  box-shadow: 0 18px 45px rgba(37, 80, 216, 0.28);
+}
+
+.dashboard-button-primary:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.dashboard-button-secondary {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-foreground);
+}
+
+.dashboard-toast {
+  animation: toast-in 180ms ease-out;
+}
+
+.dashboard-fade-up {
+  animation: fade-up 280ms ease-out both;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.prompt-caret {
+  animation: caret-blink 900ms steps(1) infinite;
+}
+
+.logo-marquee {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(90deg, transparent, white 10%, white 90%, transparent);
+}
+
+.logo-track {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 1.75rem;
+  width: max-content;
+  min-width: 100%;
+  will-change: transform;
+  animation: marquee-scroll 28s linear infinite;
+}
+
+.logo-item {
+  flex: 0 0 auto;
+}
+
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-track {
+    animation: none;
+  }
+
+  .dashboard-toast,
+  .dashboard-fade-up {
+    animation: none;
+  }
 }
 
 /*

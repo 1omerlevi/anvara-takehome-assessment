@@ -8,14 +8,22 @@ export default function Error({
   reset: () => void;
 }) {
   return (
-    <div className="rounded border border-red-200 bg-red-50 p-4 text-red-600">
-      <p className="mb-3">Something went wrong while loading campaigns.</p>
-      <button
-        onClick={reset}
-        className="rounded bg-red-600 px-3 py-1.5 text-white hover:bg-red-700"
-      >
-        Try again
-      </button>
+    <div className="dashboard-shell p-5 sm:p-8">
+      <div className="dashboard-grid">
+        <div className="dashboard-card mx-auto max-w-2xl p-8 text-center">
+          <p className="text-xs font-semibold uppercase tracking-[0.28em] text-rose-300">Load error</p>
+          <h1 className="mt-4 text-3xl font-semibold text-white">Campaign data didn’t load.</h1>
+          <p className="mx-auto mt-4 max-w-lg text-sm leading-7 text-slate-300">
+            The dashboard hit an error while requesting your latest campaign data. Retry the request to load the current portfolio.
+          </p>
+          <button
+            onClick={reset}
+            className="dashboard-button mt-6 rounded-full bg-rose-600 px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_45px_rgba(225,29,72,0.28)]"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
