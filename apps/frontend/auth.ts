@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { betterAuth } from 'better-auth';
 import { Pool } from 'pg';
 

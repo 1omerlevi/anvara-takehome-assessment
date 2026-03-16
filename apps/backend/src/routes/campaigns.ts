@@ -1,4 +1,4 @@
-import { Router, type Request, type Response, type IRouter } from 'express';
+import { Router, type Response, type IRouter } from 'express';
 import { prisma } from '../db.js';
 import { getParam } from '../utils/helpers.js';
 import { authMiddleware, roleMiddleware, type AuthRequest } from '../auth.js';
